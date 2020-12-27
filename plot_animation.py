@@ -10,21 +10,27 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
+import cartopy.crs as ccrs
+projection = ccrs.Orthographic(central_latitude=90.0)
 
 # lendo dados
 data = pd.read_csv('igrfgridData1960-2020.csv')
 
-fig, ax = plt.subplots()
+fig = plt.figure(figsize=(18,9))
+ax = plt.axes( projection = projection )
+ax.coastlines()
+ax.gridlines()
 
 def animation_frame(ano):
     df = data[data.Date == ano]
     ax.set_title(ano)
-    return ax.scatter(df.Lon,df.Lat,c=df.Bt)
+    return ax.scatter(df.Lon, df.Lat, c=df.Bt,\
+                          transform = ccrs.PlateCarree(),\
+                          cmap = plt.cm.RdBu_r)
 
 # gerando animação
-anos = np.arange(1960,2021,1)
-animation = FuncAnimation(fig, func=animation_frame, frames=anos, interval=1000)
+anos = np.arange(1960, 2021, 1)
+animation = FuncAnimation(fig, func=animation_frame, frames=anos, interval=10)
 
 print("Salvando ...")
-animation.save('animation.mp4', writer=PillowWriter(fps=1))
-#plt.show()
+animation.save('animation.gif', writer=PillowWriter(fps=40))
